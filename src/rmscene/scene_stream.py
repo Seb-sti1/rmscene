@@ -108,16 +108,16 @@ class SceneInfo(Block):
         return (0, 1)
 
     current_layer: LwwValue[CrdtId]
-    background_visible: LwwValue[bool]
-    root_document_visible: LwwValue[bool]
+    background_visible: tp.Optional[LwwValue[bool]]
+    root_document_visible: tp.Optional[LwwValue[bool]]
     paper_size: tp.Optional[tuple[int, int]]
 
     @classmethod
     def from_stream(cls, stream: TaggedBlockReader) -> SceneInfo:
         current_layer = stream.read_lww_id(1)
-        background_visible = stream.read_lww_bool(2)
-        root_document_visible = stream.read_lww_bool(3)
-        paper_size = stream.read_two_int(5)
+        background_visible = stream.read_lww_bool(2) if stream.bytes_remaining_in_block() else None
+        root_document_visible = stream.read_lww_bool(3) if stream.bytes_remaining_in_block() else None
+        paper_size = stream.read_two_int(5) if stream.bytes_remaining_in_block() else None
 
         return SceneInfo(current_layer=current_layer,
                          background_visible=background_visible,
@@ -126,8 +126,11 @@ class SceneInfo(Block):
 
     def to_stream(self, writer: TaggedBlockWriter):
         writer.write_lww_id(1, self.current_layer)
+        if not self.background_visible: return
         writer.write_lww_bool(2, self.background_visible)
+        if not self.root_document_visible: return
         writer.write_lww_bool(3, self.root_document_visible)
+        if not self.paper_size: return
         writer.write_two_int(5, self.paper_size)
 
 

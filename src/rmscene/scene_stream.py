@@ -110,21 +110,25 @@ class SceneInfo(Block):
     current_layer: LwwValue[CrdtId]
     background_visible: LwwValue[bool]
     root_document_visible: LwwValue[bool]
+    paper_size: tp.Optional[tuple[int, int]]
 
     @classmethod
     def from_stream(cls, stream: TaggedBlockReader) -> SceneInfo:
         current_layer = stream.read_lww_id(1)
         background_visible = stream.read_lww_bool(2)
         root_document_visible = stream.read_lww_bool(3)
+        paper_size = stream.read_two_int(5)
 
         return SceneInfo(current_layer=current_layer,
                          background_visible=background_visible,
-                         root_document_visible=root_document_visible)
+                         root_document_visible=root_document_visible,
+                         paper_size=paper_size)
 
     def to_stream(self, writer: TaggedBlockWriter):
         writer.write_lww_id(1, self.current_layer)
         writer.write_lww_bool(2, self.background_visible)
         writer.write_lww_bool(3, self.root_document_visible)
+        writer.write_two_int(5, self.paper_size)
 
 
 @dataclass
